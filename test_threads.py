@@ -54,17 +54,13 @@ def main():
     thread = Thread(target=handle_single_thread, args=(dict_file_obj,))
     thread.start()
     thread.join()
-    for i in range(20):
-        t = Thread(target=handle_writing_thread, args=(dict_file_obj, i))
-        t.start()
-
-    for i in range(20):
-        t = Thread(target=handle_reading_thread, args=(dict_file_obj, i))
-        t.start()
-
-    for i in range(20):
-        t = Thread(target=handle_deleting_thread, args=(dict_file_obj, i))
-        t.start()
+    for i in range(40):
+        t1 = Thread(target=handle_writing_thread, args=(dict_file_obj, i))
+        t2 = Thread(target=handle_reading_thread, args=(dict_file_obj, i))
+        t3 = Thread(target=handle_deleting_thread, args=(dict_file_obj, i))
+        t1.start()
+        t2.start()
+        t3.start()
 
 
 if __name__ == '__main__':
