@@ -2,18 +2,29 @@ from dict_db import DictDB
 import os
 import pickle
 
+
 FILE_PATH = 'db.pkl'
 
 
 class FileDB(DictDB):
     def __init__(self, dic={}):
         super().__init__(dic)
-        if os.path.exists(FILE_PATH):
-            self.__file__ = open(FILE_PATH, 'wb')
-        else:
-            self.__file__ = open(FILE_PATH, 'x')
+        if not os.path.exists(FILE_PATH):
+            self.file_dump()
+
+    def file_dump(self):
         try:
-            pickle.dump(self.__dic__, self.__file__)
+            with open(FILE_PATH, 'wb') as f:
+                pickle.dump(self.__dic__, f)
+
+        except Exception as err:
+            print('Got an exception in FileDB - file_dump: ' + str(err))
+
+    def file_load(self):
+        try:
+            with open(FILE_PATH, 'rb') as file:
+                self.__dic__ = pickle.load(file)
+
         except Exception as err:
             print('Got an exception in FileDB: ' + str(err))
 
@@ -25,16 +36,10 @@ class FileDB(DictDB):
         :param new_val: the new value
         :return: True if it worked, False if it didn't.
         """
-        try:
-            file_size = os.stat(FILE_PATH).st_size
-            if file_size > 0:
-                self.__dic__ = pickle.load(self.__file__)
-            b = super().set_val(key, new_val)
-            pickle.dump(self.__dic__, self.__file__)
-            return b
-        except Exception as err:
-            print(err)
-            return False
+        self.file_load()
+        b = super().set_val(key, new_val)
+        self.file_dump()
+        return b
 
     def delete_data(self, key):
         """
@@ -42,30 +47,24 @@ class FileDB(DictDB):
         :param key: the wanted key
         :return: the value of said key. None if the key doesn't exist.
         """
-        try:
-            file_size = os.stat(FILE_PATH).st_size
-            if file_size > 0:
-                self.__dic__ = pickle.load(self.__file__)
-            val = super().delete_data(key)
-            pickle.dump(self.__dic__, self.__file__)
-            return val
-        except Exception as err:
-            print(err)
-            return None
+        self.file_load()
+        val = super().delete_data(key)
+        self.file_dump()
+        return val
 
     def get_val(self, key):
         """
-
+        fetches the needed value by key
         :param key: the wanted key
         :return: the value of said key. None if the key doesn't exist.
         """
-        try:
-            file_size = os.stat(FILE_PATH).st_size
-            if file_size > 0:
-                self.__dic__ = pickle.load(self.__file__)
-            val = super().get_val(key)
-            pickle.dump(self.__dic__, self.__file__)
-            return val
-        except Exception as err:
-            print(err)
-            return None
+        self.file_load()
+        val = super().get_val(key)
+        self.file_dump()
+        return val
+
+
+if __name__ == "__main__":
+    f_obj = FileDB()
+    f_obj.set_val('hi', 'shalom')
+
